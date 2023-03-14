@@ -1,3 +1,7 @@
+// defines pins numbers
+
+// defines variables
+
 #include <Servo.h>
 
 Servo motor_1;
@@ -23,8 +27,18 @@ int servo6 = 180;
 
 int bt_data;
 int Speed = 130;
+long duration;
+int distance;
+const int trigPin = 2; //ultrasonic sensor trig
+const int echoPin = 3; //ultrasonic sensor echo
+
+
 
 void setup(){
+
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+  Serial.begin(9600); // Starts the serial communication
   
 Serial.begin(9600); // initialize serial communication at 9600 bits per second:
  
@@ -53,6 +67,8 @@ delay(1000);
 }
 
 void loop(){
+
+
 //if some date is sent, reads it and saves in state
 
 if(Serial.available() > 0){     
@@ -65,7 +81,15 @@ analogWrite(enA, Speed); // Write The Duty Cycle 0 to 255 Enable Pin A for Motor
 analogWrite(enB, Speed); // Write The Duty Cycle 0 to 255 Enable Pin B for Motor2 Speed 
 
 
-     if(bt_data == 1){forword(); }  // if the bt_data is '1' the DC motor will go forward
+     if(bt_data == 1){
+       if(distances()>10){
+         forword();
+         }
+         else{
+           Stop();
+         }
+         delay(2);
+      }  // if the bt_data is '1' the DC motor will go forward
 else if(bt_data == 2){backword();}  // if the bt_data is '2' the motor will Reverse
 else if(bt_data == 3){turnLeft();}  // if the bt_data is '3' the motor will turn left
 else if(bt_data == 4){turnRight();} // if the bt_data is '4' the motor will turn right
@@ -165,3 +189,21 @@ digitalWrite(in2, LOW); //Right Motor backword Pin
 digitalWrite(in3, LOW); //Left Motor backword Pin 
 digitalWrite(in4, LOW); //Left Motor forword Pin 
 }
+
+int distances(){  // Clears the trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  // Calculating the distance
+  distance = duration * 0.034 / 2;
+  return distance;
+  // Prints the distance on the Serial Monitor
+  Serial.print("Distance: ");
+  Serial.println(distance);
+}
+
